@@ -7,5 +7,6 @@ sealed class Screen(val route: String) {
     object Game : Screen("game/{levelId}") {
         fun createRoute(levelId: String) = "game/$levelId"
     }
+    object Home : Screen("home")
     object Splash : Screen("splash")
 }

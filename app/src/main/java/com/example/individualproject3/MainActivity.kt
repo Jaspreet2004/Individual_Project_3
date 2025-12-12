@@ -17,6 +17,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.individualproject3.ui.GameScreen
+import com.example.individualproject3.ui.HomeScreen
 import com.example.individualproject3.ui.LevelSelectScreen
 import com.example.individualproject3.ui.LoginScreen
 import com.example.individualproject3.ui.ParentDashboardScreen
@@ -70,11 +71,22 @@ fun AppNavigation() {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }
                     } else {
-                        navController.navigate(Screen.KidDashboard.route) {
+                        navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }
                     }
                 }
+            }
+            
+            // Home Screen
+            composable(Screen.Home.route) {
+                HomeScreen(navController = navController, onLogout = {
+                    com.example.individualproject3.util.FileLogger.log(context, "MainActivity: Home Logout -> Nuclear Restart")
+                    val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+                    intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    context.startActivity(intent)
+                    Runtime.getRuntime().exit(0)
+                })
             }
             
             // Parent Dashboard Route
