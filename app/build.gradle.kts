@@ -65,4 +65,5 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.mpandroidchart)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation("com.google.code.gson:gson:2.10.1")
 }

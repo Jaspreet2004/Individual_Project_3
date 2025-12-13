@@ -82,14 +82,13 @@ fun GameScreen(navController: NavController, levelId: String) {
     val context = LocalContext.current
     val database = AppDatabase.getDatabase(context)
     // Finds the level data
-    val level = Levels.AllLevels.find { it.id == levelId } ?: Levels.Level1_1
-
     val viewModel: GameViewModel = viewModel(
         factory = GameViewModelFactory(levelId, database.gameDao(), context)
     )
 
     // Observables from ViewModel
-    val gameState by viewModel.gameState.collectAsState()
+    val level: com.example.individualproject3.logic.LevelData by viewModel.levelData.collectAsState()
+    val gameState: com.example.individualproject3.logic.GameState by viewModel.gameState.collectAsState()
     val commandQueue by viewModel.commandQueue.collectAsState()
     val isExecuting by viewModel.isExecuting.collectAsState()
 

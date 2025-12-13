@@ -100,6 +100,35 @@ fun AppNavigation() {
                 }
             }
 
+            // Level List Route
+            composable(Screen.LevelList.route) {
+                com.example.individualproject3.ui.LevelListScreen(navController = navController, onBack = {
+                     navController.popBackStack() // Back to Home
+                }, onCreateNew = {
+                     navController.navigate(Screen.LevelBuilder.route)
+                })
+            }
+
+            // Level Builder Route
+            composable(
+                route = Screen.LevelBuilder.route,
+                arguments = listOf(androidx.navigation.navArgument("levelId") {
+                    type = NavType.IntType
+                    defaultValue = -1 // Use -1 to signify "new level"
+                })
+            ) { backStackEntry ->
+                val levelId = backStackEntry.arguments?.getInt("levelId") ?: -1
+                val actualLevelId = if (levelId == -1) null else levelId
+                
+                com.example.individualproject3.ui.LevelBuilderScreen(
+                    navController = navController, 
+                    levelId = actualLevelId,
+                    onBack = {
+                        navController.popBackStack() // Back to List
+                    }
+                )
+            }
+
             // Kid Dashboard
             composable(Screen.KidDashboard.route) {
                 LevelSelectScreen(navController = navController, onLevelSelected = { levelId ->

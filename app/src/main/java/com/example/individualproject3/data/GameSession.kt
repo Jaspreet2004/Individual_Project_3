@@ -13,7 +13,8 @@ import androidx.room.PrimaryKey
             childColumns = ["userId"],
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [androidx.room.Index(value = ["userId"])]
 )
 data class GameSession(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,

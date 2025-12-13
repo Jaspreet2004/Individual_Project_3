@@ -59,7 +59,7 @@ fun HomeScreen(navController: NavController, onLogout: () -> Unit) {
             navController.navigate(Screen.KidDashboard.route)
         },
         MenuOption("Level\nBuilder", Icons.Default.Build, MaterialTheme.colorScheme.tertiary) {
-            Toast.makeText(context, "Level Builder Coming Soon!", Toast.LENGTH_SHORT).show()
+            navController.navigate(Screen.LevelList.route)
         },
         MenuOption("Item\nShop", Icons.Default.ShoppingCart, MaterialTheme.colorScheme.secondary) {
             Toast.makeText(context, "Shop Coming Soon!", Toast.LENGTH_SHORT).show()

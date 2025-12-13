@@ -30,6 +30,18 @@ interface GameDao {
 
     @Query("SELECT levelName, COUNT(*) as attemptCount FROM game_sessions GROUP BY levelName")
     suspend fun getLevelAttemptStats(): List<LevelAttemptStats>
+
+    @Insert
+    suspend fun insertCustomLevel(level: CustomLevel)
+
+    @androidx.room.Update
+    suspend fun updateCustomLevel(level: CustomLevel)
+
+    @Query("SELECT * FROM custom_levels WHERE id = :id")
+    suspend fun getCustomLevelById(id: Int): CustomLevel?
+
+    @Query("SELECT * FROM custom_levels")
+    fun getAllCustomLevels(): Flow<List<CustomLevel>>
 }
 
 data class LevelAttemptStats(

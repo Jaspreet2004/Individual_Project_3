@@ -8,6 +8,8 @@ import com.example.individualproject3.data.GameDao
 import com.example.individualproject3.data.GameSession
 import com.example.individualproject3.logic.Command
 import com.example.individualproject3.logic.GameEngine
+import com.example.individualproject3.logic.GameState
+import com.example.individualproject3.logic.GridPosition
 import com.example.individualproject3.logic.LevelData
 import com.example.individualproject3.logic.Levels
 import com.example.individualproject3.util.FileLogger
@@ -31,12 +33,12 @@ class GameViewModel(
 ) : ViewModel() {
     
     // logic setup
-    private val level = Levels.AllLevels.find { it.id == levelId } ?: Levels.Level1_1
-    private val engine = GameEngine(level)
+    private lateinit var engine: GameEngine
     private val soundManager = SoundManager(context)
     
     // State exposed to UI
-    val gameState = engine.gameState
+    private val _gameState = MutableStateFlow(GameState(GridPosition(0, 0)))
+    val gameState = _gameState.asStateFlow()
     
     // Command Queue State
     private val _commandQueue = MutableStateFlow<List<Command>>(emptyList())
@@ -45,6 +47,49 @@ class GameViewModel(
     // Execution State
     private val _isExecuting = MutableStateFlow(false)
     val isExecuting = _isExecuting.asStateFlow()
+
+    private val _levelData = MutableStateFlow(Levels.Level1_1)
+    val levelData = _levelData.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            val loadedLevel = if (levelId.startsWith("custom_")) {
+                val dbId = levelId.removePrefix("custom_").toIntOrNull() ?: 0
+                val custom = gameDao.getCustomLevelById(dbId)
+                if (custom != null) {
+                    val gson = com.google.gson.Gson()
+                    val wallsType = object : com.google.gson.reflect.TypeToken<List<List<Int>>>() {}.type
+                    val coinsType = object : com.google.gson.reflect.TypeToken<List<List<Int>>>() {}.type
+                    val wallsList: List<List<Int>> = gson.fromJson(custom.wallsJson, wallsType) ?: emptyList()
+                    val coinsList: List<List<Int>> = gson.fromJson(custom.coinsJson, coinsType) ?: emptyList()
+                    
+                    LevelData(
+                        id = levelId,
+                        name = custom.name,
+                        rows = custom.rows,
+                        cols = custom.cols,
+                        startPos = GridPosition(custom.startRow, custom.startCol),
+                        endPos = GridPosition(custom.endRow, custom.endCol),
+                        walls = wallsList.map { GridPosition(it[0], it[1]) },
+                        coins = coinsList.map { GridPosition(it[0], it[1]) }
+                    )
+                } else {
+                    Levels.Level1_1 // Fallback
+                }
+            } else {
+                Levels.AllLevels.find { it.id == levelId } ?: Levels.Level1_1
+            }
+            
+            _levelData.value = loadedLevel
+            engine = GameEngine(loadedLevel)
+            // Forward engine state to ViewModel state
+            launch {
+                engine.gameState.collect {
+                    _gameState.value = it
+                }
+            }
+        }
+    }
 
     /**
      * Adds a command to the queue if not currently executing.
@@ -110,10 +155,10 @@ class GameViewModel(
         viewModelScope.launch {
              try {
                  // DB Log to Room Database
-                 gameDao.insertSession(
+                gameDao.insertSession(
                     GameSession(
                         userId = 1,
-                        levelName = level.name,
+                        levelName = _levelData.value.name,
                         score = if (success) 100 else 0,
                         timestamp = System.currentTimeMillis(),
                         isCompleted = success
@@ -126,7 +171,7 @@ class GameViewModel(
         // File Log for debugging
         FileLogger.log(
             context = getContextForLogger(),
-            message = "Level ${level.name} - ${if (success) "Win" else "Fail"}"
+            message = "Level ${_levelData.value.name} - ${if (success) "Win" else "Fail"}"
         )
     }
     

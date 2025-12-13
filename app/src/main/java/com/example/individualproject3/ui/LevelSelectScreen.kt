@@ -40,6 +40,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.example.individualproject3.logic.LevelData
 import com.example.individualproject3.logic.Levels
 
 /**
@@ -51,7 +54,25 @@ import com.example.individualproject3.logic.Levels
  * @param onLogout Callback for logout.
  */
 @Composable
-fun LevelSelectScreen(navController: NavController, onLevelSelected: (String) -> Unit, onLogout: () -> Unit, onBack: () -> Unit) {
+fun LevelSelectScreen(
+    navController: NavController,
+    onLevelSelected: (String) -> Unit,
+    onLogout: () -> Unit,
+    onBack: () -> Unit
+) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val database = com.example.individualproject3.data.AppDatabase.getDatabase(context)
+    val viewModel: com.example.individualproject3.logic.LevelSelectViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                return com.example.individualproject3.logic.LevelSelectViewModel(database.gameDao()) as T
+            }
+        }
+    )
+
+    val allLevels by viewModel.allLevels.collectAsState(initial = Levels.AllLevels)
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -102,8 +123,6 @@ fun LevelSelectScreen(navController: NavController, onLevelSelected: (String) ->
             }
 
             // Scrollable Content
-            // Keeping it simple with Column + Grids might have scrolling issues if list is long
-            
             LazyVerticalGrid(
                 columns = GridCells.Fixed(3),
                 contentPadding = PaddingValues(bottom = 16.dp),
@@ -115,8 +134,8 @@ fun LevelSelectScreen(navController: NavController, onLevelSelected: (String) ->
                    SectionHeader("Zone 1: The Sprout")
                 }
                 
-                items(Levels.AllLevels.filter { it.id.startsWith("1") }) { level ->
-                    LevelNode(level.name, level.id, isActive = true, onClick = onLevelSelected) // Assuming all unlocked for now or using logic
+                items(allLevels.filter { it.id.startsWith("1") }) { level ->
+                    LevelNode(level.name, level.id, isActive = true, onClick = onLevelSelected)
                 }
 
                 // Section 2 Header
@@ -124,8 +143,19 @@ fun LevelSelectScreen(navController: NavController, onLevelSelected: (String) ->
                      SectionHeader("Zone 2: The Bloom")
                 }
 
-                items(Levels.AllLevels.filter { it.id.startsWith("2") }) { level ->
+                items(allLevels.filter { it.id.startsWith("2") }) { level ->
                      LevelNode(level.name, level.id, isActive = true, onClick = onLevelSelected)
+                }
+                
+                // Section 3: Custom Levels
+                val customLevels = allLevels.filter { it.id.startsWith("custom_") }
+                if (customLevels.isNotEmpty()) {
+                    item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(3) }) {
+                        SectionHeader("Zone 3: Custom Creations")
+                    }
+                    items(customLevels) { level ->
+                        LevelNode(level.name, level.id, isActive = true, onClick = onLevelSelected)
+                    }
                 }
             }
         }
