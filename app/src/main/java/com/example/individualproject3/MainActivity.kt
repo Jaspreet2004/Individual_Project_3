@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -33,9 +35,24 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            IndividualProject3Theme {
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val prefs = remember { context.getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE) }
+            val isSystemDark = androidx.compose.foundation.isSystemInDarkTheme()
+            
+            // Load saved preference or default to system
+            val savedDarkTheme = remember { prefs.getBoolean("is_dark_theme", isSystemDark) }
+            var darkTheme by remember { androidx.compose.runtime.mutableStateOf(savedDarkTheme) }
+
+            IndividualProject3Theme(darkTheme = darkTheme) {
                 // Starts the Navigation Graph
-                AppNavigation()
+                AppNavigation(
+                    isDarkTheme = darkTheme,
+                    onToggleTheme = { 
+                        val newTheme = !darkTheme
+                        darkTheme = newTheme
+                        prefs.edit().putBoolean("is_dark_theme", newTheme).apply()
+                    }
+                )
             }
         }
     }
@@ -46,7 +63,7 @@ class MainActivity : ComponentActivity() {
  * Manages transitions between Login, Parent Dashboard, Kid Dashboard, and Game Screen.
  */
 @Composable
-fun AppNavigation() {
+fun AppNavigation(isDarkTheme: Boolean, onToggleTheme: () -> Unit) {
     val navController = rememberNavController()
     // Capture context for logging and intent launching
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -80,13 +97,18 @@ fun AppNavigation() {
             
             // Home Screen
             composable(Screen.Home.route) {
-                HomeScreen(navController = navController, onLogout = {
-                    com.example.individualproject3.util.FileLogger.log(context, "MainActivity: Home Logout -> Nuclear Restart")
-                    val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
-                    intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                    context.startActivity(intent)
-                    Runtime.getRuntime().exit(0)
-                })
+                HomeScreen(
+                    navController = navController, 
+                    isDarkTheme = isDarkTheme,
+                    onToggleTheme = onToggleTheme,
+                    onLogout = {
+                        com.example.individualproject3.util.FileLogger.log(context, "MainActivity: Home Logout -> Nuclear Restart")
+                        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+                        intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        context.startActivity(intent)
+                        Runtime.getRuntime().exit(0)
+                    }
+                )
             }
             
             // Parent Dashboard Route

@@ -165,9 +165,6 @@ fun LevelBuilderScreen(navController: NavController, levelId: Int? = null, onBac
 
     if (showSaveDialog) {
         AlertDialog(
-            containerColor = Color(0xFF252525),
-            titleContentColor = Color.White,
-            textContentColor = Color.White,
             onDismissRequest = { showSaveDialog = false },
             title = { Text("Name Your Level") },
             text = {

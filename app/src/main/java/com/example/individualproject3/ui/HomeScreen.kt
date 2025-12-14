@@ -20,6 +20,8 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Brightness4
+import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.ExitToApp
@@ -51,7 +53,12 @@ data class MenuOption(
 )
 
 @Composable
-fun HomeScreen(navController: NavController, onLogout: () -> Unit) {
+fun HomeScreen(
+    navController: NavController, 
+    isDarkTheme: Boolean = false,
+    onToggleTheme: () -> Unit = {},
+    onLogout: () -> Unit
+) {
     val context = LocalContext.current
 
     val menuOptions = listOf(
@@ -105,17 +112,33 @@ fun HomeScreen(navController: NavController, onLogout: () -> Unit) {
                     )
                 }
                 
-                IconButton(
-                    onClick = onLogout,
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.errorContainer)
-                ) {
-                    Icon(
-                        Icons.Default.ExitToApp,
-                        contentDescription = "Logout",
-                        tint = MaterialTheme.colorScheme.onErrorContainer
-                    )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                     // Theme Toggle
+                    IconButton(
+                        onClick = onToggleTheme,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surface)
+                    ) {
+                        Icon(
+                            imageVector = if (isDarkTheme) Icons.Default.Brightness7 else Icons.Default.Brightness4,
+                            contentDescription = "Toggle Theme",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    IconButton(
+                        onClick = onLogout,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.errorContainer)
+                    ) {
+                        Icon(
+                            Icons.Default.ExitToApp,
+                            contentDescription = "Logout",
+                            tint = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
                 }
             }
 
