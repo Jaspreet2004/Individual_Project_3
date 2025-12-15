@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -67,6 +68,9 @@ fun HomeScreen(
         },
         MenuOption("Level\nBuilder", Icons.Default.Build, MaterialTheme.colorScheme.tertiary) {
             navController.navigate(Screen.LevelList.route)
+        },
+        MenuOption("Nature\nQuiz", Icons.Default.School, Color(0xFF9C27B0)) { // Purple
+            navController.navigate(Screen.QuizTopics.route)
         },
         MenuOption("Item\nShop", Icons.Default.ShoppingCart, MaterialTheme.colorScheme.secondary) {
             Toast.makeText(context, "Shop Coming Soon!", Toast.LENGTH_SHORT).show()

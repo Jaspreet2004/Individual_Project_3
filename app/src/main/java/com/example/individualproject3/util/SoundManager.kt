@@ -31,6 +31,14 @@ class SoundManager(private val context: Context) {
         toneGen.startTone(ToneGenerator.TONE_PROP_ACK, 50)
     }
 
+    fun playCorrectSound() {
+        toneGen.startTone(ToneGenerator.TONE_SUP_PIP, 150) // High short beep
+    }
+
+    fun playWrongSound() {
+        toneGen.startTone(ToneGenerator.TONE_CDMA_SOFT_ERROR_LITE, 300) // Lower buzz
+    }
+
     fun playBGM() {
     }
     

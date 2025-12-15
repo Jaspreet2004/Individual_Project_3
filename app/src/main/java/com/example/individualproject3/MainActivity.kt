@@ -174,6 +174,27 @@ fun AppNavigation(isDarkTheme: Boolean, onToggleTheme: () -> Unit) {
                 val levelId = backStackEntry.arguments?.getString("levelId") ?: "1-1"
                 GameScreen(navController = navController, levelId = levelId)
             }
+
+            // Quiz Topics
+            composable(Screen.QuizTopics.route) {
+                com.example.individualproject3.ui.QuizTopicScreen(
+                    navController = navController,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            // Quiz Game
+            composable(
+                route = Screen.Quiz.route,
+                arguments = listOf(navArgument("topicId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val topicId = backStackEntry.arguments?.getString("topicId") ?: "plants"
+                com.example.individualproject3.ui.QuizScreen(
+                    navController = navController,
+                    topicId = topicId,
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
     }
 }

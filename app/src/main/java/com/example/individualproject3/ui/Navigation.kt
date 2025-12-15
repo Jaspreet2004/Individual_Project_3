@@ -13,4 +13,8 @@ sealed class Screen(val route: String) {
         fun createRoute(levelId: Int? = null) = if (levelId != null) "level_builder?levelId=$levelId" else "level_builder"
     }
     object Splash : Screen("splash")
+    object QuizTopics : Screen("quiz_topics")
+    object Quiz : Screen("quiz/{topicId}") {
+        fun createRoute(topicId: String) = "quiz/$topicId"
+    }
 }
